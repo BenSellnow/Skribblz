@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFilterStore, useMemoStore, useUserStore } from "../store/module";
-import { useTranslate } from "@/utils/i18n";
+import { useTranslation } from "react-i18next";
 import { getMemoStats } from "@/helpers/api";
 import { DAILY_TIMESTAMP } from "@/helpers/consts";
 import { getDateStampByDate, getDateString, getTimeStampByDate } from "@/helpers/datetime";
@@ -29,7 +29,7 @@ interface DailyUsageStat {
 }
 
 const UsageHeatMap = () => {
-  const t = useTranslate();
+  const { t } = useTranslation();
   const filterStore = useFilterStore();
   const userStore = useUserStore();
   const memoStore = useMemoStore();
@@ -57,7 +57,7 @@ const UsageHeatMap = () => {
 
   useEffect(() => {
     getMemoStats(currentUserId)
-      .then(({ data }) => {
+      .then(({ data: { data } }) => {
         setMemoAmount(data.length);
         const newStat: DailyUsageStat[] = getInitialUsageStat(usedDaysAmount, beginDayTimestamp);
         for (const record of data) {
@@ -83,8 +83,14 @@ const UsageHeatMap = () => {
     const bounding = utils.getElementBounding(event.target as HTMLElement);
     tempDiv.style.left = bounding.left + "px";
     tempDiv.style.top = bounding.top - 2 + "px";
-    const tMemoOnOpts = { amount: item.count, date: getDateString(item.timestamp as number) };
-    tempDiv.innerHTML = item.count === 1 ? t("heatmap.memo-on", tMemoOnOpts) : t("heatmap.memos-on", tMemoOnOpts);
+    const memoAmount = item.count;
+    const date = getDateString(item.timestamp as number);
+    tempDiv.innerHTML = `
+      <p className="w-full pl-4 text-xs -mt-2 mb-3 text-gray-400 dark:text-zinc-400">
+        <span className="font-medium text-gray-500 dark:text-zinc-300 number">${memoAmount}</span>
+        ${memoAmount === 1 ? "Skribbl on" : "Skribblz on"}
+        <span className="font-medium text-gray-500 dark:text-zinc-300">${date}</span>
+      </p>`;
     document.body.appendChild(tempDiv);
 
     if (tempDiv.offsetLeft - tempDiv.clientWidth / 2 < 0) {
@@ -162,7 +168,7 @@ const UsageHeatMap = () => {
       </div>
       <p className="w-full pl-4 text-xs -mt-2 mb-3 text-gray-400 dark:text-zinc-400">
         <span className="font-medium text-gray-500 dark:text-zinc-300 number">{memoAmount} </span>
-        {memoAmount === 1 ? t("heatmap.memo-in", tMemoInOpts) : t("heatmap.memos-in", tMemoInOpts)}{" "}
+        {memoAmount === 1 ? "Skribbl in" : "Skribblz in"}{" "}
         <span className="font-medium text-gray-500 dark:text-zinc-300">{createdDays} </span>
         {createdDays === 1 ? t("heatmap.day", tMemoInOpts) : t("heatmap.days", tMemoInOpts)}
       </p>
