@@ -2,7 +2,7 @@ import { Select, Option } from "@mui/joy";
 import { QRCodeSVG } from "qrcode.react";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
-import { useTranslate } from "@/utils/i18n";
+import { useTranslation } from "react-i18next";
 import copy from "copy-to-clipboard";
 import { toLower } from "lodash-es";
 import toImage from "@/labs/html2image";
@@ -30,7 +30,7 @@ interface State {
 
 const ShareMemoDialog: React.FC<Props> = (props: Props) => {
   const { memo: propsMemo, destroy } = props;
-  const t = useTranslate();
+  const { t } = useTranslation();
   const userStore = useUserStore();
   const memoStore = useMemoStore();
   const globalStore = useGlobalStore();
@@ -52,7 +52,7 @@ const ShareMemoDialog: React.FC<Props> = (props: Props) => {
 
   useEffect(() => {
     getMemoStats(user.id)
-      .then(({ data }) => {
+      .then(({ data: { data } }) => {
         setPartialState({
           memoAmount: data.length,
         });
@@ -109,7 +109,7 @@ const ShareMemoDialog: React.FC<Props> = (props: Props) => {
   const memoVisibilityOptionSelectorItems = VISIBILITY_SELECTOR_ITEMS.map((item) => {
     return {
       value: item.value,
-      text: t(`memo.visibility.${toLower(item.value) as Lowercase<typeof item.value>}`),
+      text: t(`memo.visibility.${toLower(item.value)}`),
     };
   });
 
@@ -127,7 +127,7 @@ const ShareMemoDialog: React.FC<Props> = (props: Props) => {
   return (
     <>
       <div className="dialog-header-container py-3 px-4 !mb-0 rounded-t-lg">
-        <p className="">{t("common.share")} Memo</p>
+        <p className="">{t("common.share")} Skribbl</p>
         <button className="btn close-btn" onClick={handleCloseBtnClick}>
           <Icon.X className="icon-img" />
         </button>
@@ -186,12 +186,12 @@ const ShareMemoDialog: React.FC<Props> = (props: Props) => {
               <div className="w-auto grow truncate flex mr-2 flex-col justify-center items-start">
                 <span className="w-full text-sm truncate font-bold text-gray-600 dark:text-gray-300">{user.nickname || user.username}</span>
                 <span className="text-xs text-gray-400">
-                  {state.memoAmount} MEMOS / {createdDays} DAYS
+                  {state.memoAmount} SKRIBBLZ / {createdDays} DAYS
                 </span>
               </div>
               <QRCodeSVG
                 value={`${window.location.origin}/m/${memo.id}`}
-                size={40}
+                size={75}
                 bgColor={"#F3F4F6"}
                 fgColor={"#4B5563"}
                 includeMargin={false}
